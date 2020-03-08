@@ -24,6 +24,7 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
+  DEVICE: openwrt-bcm27xx-bcm2709-rpi-2
   CONFIG_FILE: rpi2-lean-openwrt.config
   DIY_SH: lean-openwrt.sh
   FREE_UP_DISK: true
@@ -121,7 +122,7 @@ jobs:
         cd openwrt/bin/targets/*/*
         touch Download-Url.txt
         echo "config.seed" >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@config.seed" -F "token=${{ secrets.TMP_LINK_PASSWORD }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
+        curl -k -F "file=@config.seed" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
         echo -e "\n" >> $DOWNLOAD_URL_FILE
 #      uses: actions/upload-artifact@master
 #      if: steps.compile.outputs.status == 'success'
@@ -135,7 +136,7 @@ jobs:
         cd openwrt/bin/packages
         zip -q -r packages.zip arm_cortex-a7_neon-vfpv4
         echo "packages.zip" >> ../targets/*/*/$DOWNLOAD_URL_FILE
-        curl -k -F "file=@packages.zip" -F "token=${{ secrets.TMP_LINK_PASSWORD }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> ../targets/*/*/$DOWNLOAD_URL_FILE
+        curl -k -F "file=@packages.zip" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> ../targets/*/*/$DOWNLOAD_URL_FILE
         echo -e "\n" >> ../targets/*/*/$DOWNLOAD_URL_FILE
 #      uses: actions/upload-artifact@master
 #      if: steps.compile.outputs.status == 'success'
@@ -148,7 +149,7 @@ jobs:
       run: |
         cd openwrt/bin/targets/*/*
         echo *.manifest >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@*.manifest" -F "token=${{ secrets.TMP_LINK_PASSWORD }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
+        curl -k -F "file=@$DEVICE.manifest" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
         echo -e "\n" >> $DOWNLOAD_URL_FILE
 #      uses: actions/upload-artifact@master
 #      if: steps.compile.outputs.status == 'success'
@@ -162,7 +163,7 @@ jobs:
         cd openwrt/bin/targets/*/*
         zip -q -r kernel-packages.zip packages
         echo "kernel-packages.zip" >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@kernel-packages.zip" -F "token=${{ secrets.TMP_LINK_PASSWORD }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
+        curl -k -F "file=@kernel-packages.zip" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
         echo -e "\n" >> $DOWNLOAD_URL_FILE
 #      uses: actions/upload-artifact@master
 #      if: steps.compile.outputs.status == 'success'
@@ -175,7 +176,7 @@ jobs:
       run: |
         cd openwrt/bin/targets/*/*
         echo *-rootfs.tar.gz >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@*-rootfs.tar.gz" -F "token=${{ secrets.TMP_LINK_PASSWORD }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
+        curl -k -F "file=@$DEVICE-rootfs.tar.gz" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
         echo -e "\n" >> $DOWNLOAD_URL_FILE
 #      uses: actions/upload-artifact@master
 #      if: steps.compile.outputs.status == 'success'
@@ -188,7 +189,7 @@ jobs:
       run: |
         cd openwrt/bin/targets/*/*
         echo *-squashfs-factory.img.gz >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@*-squashfs-factory.img.gz" -F "token=${{ secrets.TMP_LINK_PASSWORD }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
+        curl -k -F "file=@$DEVICE-squashfs-factory.img.gz" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
         echo -e "\n" >> $DOWNLOAD_URL_FILE
 #      uses: actions/upload-artifact@master
 #      if: steps.compile.outputs.status == 'success'
@@ -201,7 +202,7 @@ jobs:
       run: |
         cd openwrt/bin/targets/*/*
         echo *-squashfs-sysupgrade.img.gz >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@*-squashfs-sysupgrade.img.gz" -F "token=${{ secrets.TMP_LINK_PASSWORD }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
+        curl -k -F "file=@$DEVICE-squashfs-sysupgrade.img.gz" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
         echo -e "\n" >> $DOWNLOAD_URL_FILE
 #      uses: actions/upload-artifact@master
 #      if: steps.compile.outputs.status == 'success'
@@ -214,7 +215,7 @@ jobs:
       run: |
         cd openwrt/bin/targets/*/*
         echo *-ext4-factory.img.gz >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@*-ext4-factory.img.gz" -F "token=${{ secrets.TMP_LINK_PASSWORD }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
+        curl -k -F "file=@$DEVICE-ext4-factory.img.gz" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
         echo -e "\n" >> $DOWNLOAD_URL_FILE
 #      uses: actions/upload-artifact@master
 #      if: steps.compile.outputs.status == 'success'
@@ -227,20 +228,20 @@ jobs:
       run: |
         cd openwrt/bin/targets/*/*
         echo *-ext4-sysupgrade.img.gz >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@*-ext4-sysupgrade.img.gz" -F "token=${{ secrets.TMP_LINK_PASSWORD }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
+        curl -k -F "file=@$DEVICE-ext4-sysupgrade.img.gz" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
         echo -e "\n" >> $DOWNLOAD_URL_FILE
 #      uses: actions/upload-artifact@master
 #      if: steps.compile.outputs.status == 'success'
 #      with:
 #        name: openwrt-bcm27xx-bcm2709-rpi-2-ext4-sysupgrade.img
 #        path: openwrt/bin/targets/bcm27xx/bcm2709/openwrt-bcm27xx-bcm2709-rpi-2-ext4-sysupgrade.img
-        
+
     - name: Upload Images Sha256sums
       if: steps.compile.outputs.status == 'success'
       run: |
         cd openwrt/bin/targets/*/*
         echo sha256sums >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@sha256sums" -F "token=${{ secrets.TMP_LINK_PASSWORD }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
+        curl -k -F "file=@sha256sums" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
 #      uses: actions/upload-artifact@master
 #      if: steps.compile.outputs.status == 'success'
 #      with:
