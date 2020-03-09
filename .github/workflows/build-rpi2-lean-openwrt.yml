@@ -29,7 +29,7 @@ env:
   DIY_SH: lean-openwrt.sh
   FREE_UP_DISK: true
   SSH_ACTIONS: false
-  DOWNLOAD_URL_FILE: Download-Url.txt
+  DOWNLOAD_URL_FILE: Tmp-Link-Url.txt
   TZ: Asia/Shanghai
 
 jobs:
@@ -102,155 +102,101 @@ jobs:
         make -j$(nproc) || make -j1 V=s
         echo "::set-output name=status::success"
 
-#    - name: Extract Gz Files
-#      run: |
-#        cd openwrt/bin/targets/bcm27xx/bcm2709
-#        gzip -q -d openwrt-bcm27xx-bcm2709-rpi-2-squashfs-factory.img.gz || true
-#        gzip -q -d openwrt-bcm27xx-bcm2709-rpi-2-squashfs-sysupgrade.img.gz || true
-#        gzip -q -d openwrt-bcm27xx-bcm2709-rpi-2-ext4-factory.img.gz || true
-#        gzip -q -d openwrt-bcm27xx-bcm2709-rpi-2-ext4-sysupgrade.img.gz || true
+    - name: Upload Files to Tmp.Link
+      if: steps.compile.outputs.status == 'success'
+      run: |
+        chmod +x upload-to-tmp-link.sh
+        ./upload-to-tmp-link.sh
 
-#    - name: Generate Sha256sum File
-#      run: |
-#        cd openwrt/bin/targets/bcm27xx/bcm2709
-#        rm -rf sha256sums
-#        sha256sum openwrt* > sha256sums
-
-    - name: Upload Config
-      if: steps.compile.outputs.status == 'success'
-      run: |
-        cd openwrt/bin/targets/*/*
-        touch Download-Url.txt
-        echo "config.seed" >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@config.seed" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
-        echo -e "\n" >> $DOWNLOAD_URL_FILE
-#      uses: actions/upload-artifact@master
-#      if: steps.compile.outputs.status == 'success'
-#      with:
-#        name: config.seed
-#        path: openwrt/bin/targets/bcm27xx/bcm2709/config.seed
-        
-    - name: Upload Packages
-      if: steps.compile.outputs.status == 'success'
-      run: |
-        cd openwrt/bin/packages
-        zip -q -r packages.zip arm_cortex-a7_neon-vfpv4
-        echo "packages.zip" >> ../targets/*/*/$DOWNLOAD_URL_FILE
-        curl -k -F "file=@packages.zip" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> ../targets/*/*/$DOWNLOAD_URL_FILE
-        echo -e "\n" >> ../targets/*/*/$DOWNLOAD_URL_FILE
-#      uses: actions/upload-artifact@master
-#      if: steps.compile.outputs.status == 'success'
-#      with:
-#        name: packages
-#        path: openwrt/bin/packages/arm_cortex-a7_neon-vfpv4/
-        
-    - name: Upload Packages Info
-      if: steps.compile.outputs.status == 'success'
-      run: |
-        cd openwrt/bin/targets/*/*
-        echo *.manifest >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@$DEVICE.manifest" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
-        echo -e "\n" >> $DOWNLOAD_URL_FILE
-#      uses: actions/upload-artifact@master
-#      if: steps.compile.outputs.status == 'success'
-#      with:
-#        name: openwrt-bcm27xx-bcm2709-rpi-2.manifest
-#        path: openwrt/bin/targets/bcm27xx/bcm2709/openwrt-bcm27xx-bcm2709-rpi-2.manifest
-        
-    - name: Upload Kernel Packages
-      if: steps.compile.outputs.status == 'success'
-      run: |
-        cd openwrt/bin/targets/*/*
-        zip -q -r kernel-packages.zip packages
-        echo "kernel-packages.zip" >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@kernel-packages.zip" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
-        echo -e "\n" >> $DOWNLOAD_URL_FILE
-#      uses: actions/upload-artifact@master
-#      if: steps.compile.outputs.status == 'success'
-#      with:
-#        name: kernel-packages
-#        path: openwrt/bin/targets/bcm27xx/bcm2709/packages/
-        
-    - name: Upload RootFS Archive
-      if: steps.compile.outputs.status == 'success'
-      run: |
-        cd openwrt/bin/targets/*/*
-        echo *-rootfs.tar.gz >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@$DEVICE-rootfs.tar.gz" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
-        echo -e "\n" >> $DOWNLOAD_URL_FILE
-#      uses: actions/upload-artifact@master
-#      if: steps.compile.outputs.status == 'success'
-#      with:
-#        name: openwrt-bcm27xx-bcm2709-rpi-2-rootfs.tar.gz
-#        path: openwrt/bin/targets/bcm27xx/bcm2709/openwrt-bcm27xx-bcm2709-rpi-2-rootfs.tar.gz
-        
-    - name: Upload SquashFS Factory Image
-      if: steps.compile.outputs.status == 'success'
-      run: |
-        cd openwrt/bin/targets/*/*
-        echo *-squashfs-factory.img.gz >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@$DEVICE-squashfs-factory.img.gz" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
-        echo -e "\n" >> $DOWNLOAD_URL_FILE
-#      uses: actions/upload-artifact@master
-#      if: steps.compile.outputs.status == 'success'
-#      with:
-#        name: openwrt-bcm27xx-bcm2709-rpi-2-squashfs-factory.img
-#        path: openwrt/bin/targets/bcm27xx/bcm2709/openwrt-bcm27xx-bcm2709-rpi-2-squashfs-factory.img
-        
-    - name: Upload SquashFS Sysupgrade Image
-      if: steps.compile.outputs.status == 'success'
-      run: |
-        cd openwrt/bin/targets/*/*
-        echo *-squashfs-sysupgrade.img.gz >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@$DEVICE-squashfs-sysupgrade.img.gz" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
-        echo -e "\n" >> $DOWNLOAD_URL_FILE
-#      uses: actions/upload-artifact@master
-#      if: steps.compile.outputs.status == 'success'
-#      with:
-#        name: openwrt-bcm27xx-bcm2709-rpi-2-squashfs-sysupgrade.img
-#        path: openwrt/bin/targets/bcm27xx/bcm2709/openwrt-bcm27xx-bcm2709-rpi-2-squashfs-sysupgrade.img
-        
-    - name: Upload Ext4 Factory Image
-      if: steps.compile.outputs.status == 'success'
-      run: |
-        cd openwrt/bin/targets/*/*
-        echo *-ext4-factory.img.gz >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@$DEVICE-ext4-factory.img.gz" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
-        echo -e "\n" >> $DOWNLOAD_URL_FILE
-#      uses: actions/upload-artifact@master
-#      if: steps.compile.outputs.status == 'success'
-#      with:
-#        name: openwrt-bcm27xx-bcm2709-rpi-2-ext4-factory.img
-#        path: openwrt/bin/targets/bcm27xx/bcm2709/openwrt-bcm27xx-bcm2709-rpi-2-ext4-factory.img
-        
-    - name: Upload Ext4 Sysupgrade Image
-      if: steps.compile.outputs.status == 'success'
-      run: |
-        cd openwrt/bin/targets/*/*
-        echo *-ext4-sysupgrade.img.gz >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@$DEVICE-ext4-sysupgrade.img.gz" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
-        echo -e "\n" >> $DOWNLOAD_URL_FILE
-#      uses: actions/upload-artifact@master
-#      if: steps.compile.outputs.status == 'success'
-#      with:
-#        name: openwrt-bcm27xx-bcm2709-rpi-2-ext4-sysupgrade.img
-#        path: openwrt/bin/targets/bcm27xx/bcm2709/openwrt-bcm27xx-bcm2709-rpi-2-ext4-sysupgrade.img
-
-    - name: Upload Images Sha256sums
-      if: steps.compile.outputs.status == 'success'
-      run: |
-        cd openwrt/bin/targets/*/*
-        echo sha256sums >> $DOWNLOAD_URL_FILE
-        curl -k -F "file=@sha256sums" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s | sed -n '2p' >> $DOWNLOAD_URL_FILE
-#      uses: actions/upload-artifact@master
-#      if: steps.compile.outputs.status == 'success'
-#      with:
-#        name: sha256sums
-#        path: openwrt/bin/targets/bcm27xx/bcm2709/sha256sums
-
-    - name: Upload Download-Url.txt
+    - name: Upload Tmp-Link-Url.txt
       uses: actions/upload-artifact@master
       if: steps.compile.outputs.status == 'success'
       with:
-        name: Download-Url.txt
-        path: openwrt/bin/targets/bcm27xx/bcm2709/Download-Url.txt
+        name: Tmp-Link-Url.txt
+        path: openwrt/bin/targets/bcm27xx/bcm2709/Tmp-Link-Url.txt
+
+    - name: Extract Gz Files
+      if: steps.compile.outputs.status == 'success'
+      run: |
+        cd openwrt/bin/targets/bcm27xx/bcm2709
+        gzip -q -d openwrt-bcm27xx-bcm2709-rpi-2-squashfs-factory.img.gz || true
+        gzip -q -d openwrt-bcm27xx-bcm2709-rpi-2-squashfs-sysupgrade.img.gz || true
+        gzip -q -d openwrt-bcm27xx-bcm2709-rpi-2-ext4-factory.img.gz || true
+        gzip -q -d openwrt-bcm27xx-bcm2709-rpi-2-ext4-sysupgrade.img.gz || true
+
+    - name: Generate New Sha256sum File
+      if: steps.compile.outputs.status == 'success'
+      run: |
+        cd openwrt/bin/targets/bcm27xx/bcm2709
+        rm -rf sha256sums
+        sha256sum openwrt* > sha256sums
+
+    - name: Upload Config
+      uses: actions/upload-artifact@master
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: config.seed
+        path: openwrt/bin/targets/bcm27xx/bcm2709/config.seed
+        
+    - name: Upload Packages
+      uses: actions/upload-artifact@master
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: packages
+        path: openwrt/bin/packages/arm_cortex-a7_neon-vfpv4/
+        
+    - name: Upload Packages Info
+      uses: actions/upload-artifact@master
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: openwrt-bcm27xx-bcm2709-rpi-2.manifest
+        path: openwrt/bin/targets/bcm27xx/bcm2709/openwrt-bcm27xx-bcm2709-rpi-2.manifest
+        
+    - name: Upload Kernel Packages
+      uses: actions/upload-artifact@master
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: kernel-packages
+        path: openwrt/bin/targets/bcm27xx/bcm2709/packages/
+        
+    - name: Upload RootFS Archive
+      uses: actions/upload-artifact@master
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: openwrt-bcm27xx-bcm2709-rpi-2-rootfs.tar.gz
+        path: openwrt/bin/targets/bcm27xx/bcm2709/openwrt-bcm27xx-bcm2709-rpi-2-rootfs.tar.gz
+        
+    - name: Upload SquashFS Factory Image
+      uses: actions/upload-artifact@master
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: openwrt-bcm27xx-bcm2709-rpi-2-squashfs-factory.img
+        path: openwrt/bin/targets/bcm27xx/bcm2709/openwrt-bcm27xx-bcm2709-rpi-2-squashfs-factory.img
+        
+    - name: Upload SquashFS Sysupgrade Image
+      uses: actions/upload-artifact@master
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: openwrt-bcm27xx-bcm2709-rpi-2-squashfs-sysupgrade.img
+        path: openwrt/bin/targets/bcm27xx/bcm2709/openwrt-bcm27xx-bcm2709-rpi-2-squashfs-sysupgrade.img
+        
+    - name: Upload Ext4 Factory Image
+      uses: actions/upload-artifact@master
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: openwrt-bcm27xx-bcm2709-rpi-2-ext4-factory.img
+        path: openwrt/bin/targets/bcm27xx/bcm2709/openwrt-bcm27xx-bcm2709-rpi-2-ext4-factory.img
+        
+    - name: Upload Ext4 Sysupgrade Image
+      uses: actions/upload-artifact@master
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: openwrt-bcm27xx-bcm2709-rpi-2-ext4-sysupgrade.img
+        path: openwrt/bin/targets/bcm27xx/bcm2709/openwrt-bcm27xx-bcm2709-rpi-2-ext4-sysupgrade.img
+
+    - name: Upload Images Sha256sums
+      uses: actions/upload-artifact@master
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: sha256sums
+        path: openwrt/bin/targets/bcm27xx/bcm2709/sha256sums
