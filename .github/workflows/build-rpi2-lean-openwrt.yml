@@ -107,11 +107,11 @@ jobs:
         # Upload Packages to Tmp.Link
         cd openwrt/bin/packages
         zip -q -r packages.zip *
-        echo "packages.zip" >> ../targets/*/*/$DOWNLOAD_URL_FILE
-        curl -k -F "file=@packages.zip" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s >> ../targets/*/*/$DOWNLOAD_URL_FILE
+        echo "packages.zip" >> ../targets/bcm27xx/bcm2709/$DOWNLOAD_URL_FILE
+        curl -k -F "file=@packages.zip" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s >> ../targets/bcm27xx/bcm2709/$DOWNLOAD_URL_FILE
 
         # Upload Kernel-Packages to Tmp.Link
-        cd ../targets/*/*
+        cd ../targets/bcm27xx/bcm2709
         zip -q -r kernel-packages.zip packages
         echo "kernel-packages.zip" >> $DOWNLOAD_URL_FILE
         curl -k -F "file=@kernel-packages.zip" -F "token=${{ secrets.TMP_LINK_TOKEN }}" -F "model=0" -X POST "https://connect.tmp.link/api_v2/cli_uploader" -s >> $DOWNLOAD_URL_FILE
