@@ -30,7 +30,7 @@ env:
   TZ: Asia/Shanghai
   TARGET: bcm27xx
   SUBTARGET: bcm2711
-  DEVICE: openwrt-bcm27xx-bcm2709-rpi-4
+  DEVICE: openwrt-bcm27xx-bcm2711-rpi-4
   FREE_UP_DISK: true
   SSH_ACTIONS: false
   UPLOAD_EXT4_IMAGES: true
