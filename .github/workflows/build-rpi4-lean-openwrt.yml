@@ -79,15 +79,6 @@ jobs:
 
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
-
-    - name: Install Toolchain
-      run: |
-        cd openwrt
-        mkdir -p staging_dir
-        curl -LJOs https://github.com/SuLingGG/Test-Action/releases/download/toolchain-rpi2/openwrt-toolchain-bcm27xx-bcm2709_gcc-7.5.0_musl_eabi.Linux-x86_64.tar_2.bz2
-        tar -jxf openwrt-toolchain*
-        mv openwrt-toolchain*/toolchain* staging_dir
-        rm -f openwrt-toolchain*
       
     - name: Load custom configuration
       run: |
